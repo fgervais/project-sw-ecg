@@ -13,8 +13,14 @@
 #     time.sleep(1)
 
 
+import signal
 import socket
 import socketserver
+
+
+def signal_handler(sig, frame):
+    print("You pressed Ctrl+C!")
+    server.shutdown()
 
 
 class TCPServer6(socketserver.TCPServer):
@@ -47,12 +53,16 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         self.request.sendall(self.data.upper())
         # after we return, the socket will be closed.
 
-if __name__ == "__main__":
-    # HOST, PORT = "fd04:2240::1cef", 50000
-    HOST, PORT = "::", 50000
 
-    # Create the server, binding to localhost on port 9999
-    with TCPServer6((HOST, PORT), MyTCPHandler) as server:
-        # Activate the server; this will keep running until you
-        # interrupt the program with Ctrl-C
-        server.serve_forever()
+# signal.signal(signal.SIGINT, signal_handler)
+
+# HOST, PORT = "fd04:2240::1cef", 50000
+HOST, PORT = "::", 50000
+
+server = TCPServer6((HOST, PORT), MyTCPHandler)
+try:
+    server.serve_forever()
+except KeyboardInterrupt:
+    pass
+
+server.server_close()
