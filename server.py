@@ -16,6 +16,7 @@
 import signal
 import socket
 import socketserver
+import struct
 
 
 def signal_handler(sig, frame):
@@ -41,16 +42,26 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         # self.request is the TCP socket connected to the client
-        pieces = [b'']
-        total = 0
-        while b'\n' not in pieces[-1] and total < 10_000:
-            pieces.append(self.request.recv(2000))
-            total += len(pieces[-1])
-        self.data = b''.join(pieces)
+        # pieces = [b'']
+        # total = 0
+        # while b'\n' not in pieces[-1] and total < 10_000:
+        #     pieces.append(self.request.recv(2000))
+        #     total += len(pieces[-1])
+        # self.data = b''.join(pieces)
+
+
         print(f"Received from {self.client_address[0]}:")
-        print(self.data.decode("utf-8"))
+        
+        while True:
+            received_bytes = self.request.recv(2000)
+            integer_value = struct.unpack('!I', received_bytes)[0]
+            print(integer_value)
+
+
+
+        # print(self.data.decode("utf-8"))
         # just send back the same data, but upper-cased
-        self.request.sendall(self.data.upper())
+        # self.request.sendall(self.data.upper())
         # after we return, the socket will be closed.
 
 
