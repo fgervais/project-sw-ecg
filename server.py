@@ -1,55 +1,16 @@
-# import socket
-# import time
-
-
-# server = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-# # server.bind(("::1", 50000))
-# server.bind(("fd04:2240::1cef", 50000))
-# server.listen()
-
-# (conn, address) = server.accept()
-
-# while True:
-#     time.sleep(1)
-
-
-import signal
 import socket
 import socketserver
 import struct
 
-
-def signal_handler(sig, frame):
-    print("You pressed Ctrl+C!")
-    server.shutdown()
+from threading import Thread
 
 
 class TCPServer6(socketserver.TCPServer):
     address_family = socket.AF_INET6
-    # def __init__(self, *args):
-    #     super().__init__(*args)
-        # self.address_family = socket.AF_INET6
 
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
-    """
-    The request handler class for our server.
-
-    It is instantiated once per connection to the server, and must
-    override the handle() method to implement communication to the
-    client.
-    """
-
     def handle(self):
-        # self.request is the TCP socket connected to the client
-        # pieces = [b'']
-        # total = 0
-        # while b'\n' not in pieces[-1] and total < 10_000:
-        #     pieces.append(self.request.recv(2000))
-        #     total += len(pieces[-1])
-        # self.data = b''.join(pieces)
-
-
         print(f"Received from {self.client_address[0]}:")
         
         try:
@@ -71,22 +32,20 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             self.request.close()  # Ensure socket is closed
 
 
+class MyServer(Thread):
+    def __init__(self, host="::", port=50000):
+        super().__init__()
 
-        # print(self.data.decode("utf-8"))
-        # just send back the same data, but upper-cased
-        # self.request.sendall(self.data.upper())
-        # after we return, the socket will be closed.
+        self.server = TCPServer6((host, port), MyTCPHandler)
 
+        # self.asked_to_teardown = False
 
-# signal.signal(signal.SIGINT, signal_handler)
+    def teardown(self):
+        print("teardown")
+        self.server.shutdown()
+        self.server.server_close()
 
-# HOST, PORT = "fd04:2240::1cef", 50000
-HOST, PORT = "::", 50000
+        # self.asked_to_teardown = True
 
-server = TCPServer6((HOST, PORT), MyTCPHandler)
-try:
-    server.serve_forever()
-except KeyboardInterrupt:
-    pass
-
-server.server_close()
+    def run(self):
+        self.server.serve_forever()
