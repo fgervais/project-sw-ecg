@@ -52,10 +52,23 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
         print(f"Received from {self.client_address[0]}:")
         
-        while True:
-            received_bytes = self.request.recv(2000)
-            integer_value = struct.unpack('!I', received_bytes)[0]
-            print(integer_value)
+        try:
+            while True:
+                received_bytes = self.request.recv(2000)
+
+                if not received_bytes:
+                    print(f"Connection from {self.client_address} closed.")
+                    break
+
+                integer_value = struct.unpack('!I', received_bytes)[0]
+                print(integer_value)
+
+        except ConnectionResetError:
+            print(f"Connection reset by {self.client_address}")
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            self.request.close()  # Ensure socket is closed
 
 
 
