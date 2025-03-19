@@ -1,0 +1,20 @@
+services:
+  ecg:
+    build: .
+    user: ${UID:-1000}:${GID:-1000}
+    environment:
+      - DEBUG=1
+      # - QT_DEBUG_PLUGINS=1
+      - DISPLAY=${DISPLAY}
+      - HOME=/tmp
+      # Prevent a warning when launching the app
+      - XDG_RUNTIME_DIR=/tmp/runtime-
+    volumes:
+      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    tmpfs:
+      - /tmp
+    working_dir: /app
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+    command: ["python", "main.py"]
