@@ -1,4 +1,6 @@
 # import socket
+import logging
+import signal
 import time
 
 from server import MyServer
@@ -15,14 +17,18 @@ from server import MyServer
 #     time.sleep(1)
 
 
-import signal
+# def signal_handler(sig, frame):
+#     print("You pressed Ctrl+C!")
+#     server.shutdown()
 
 
-def signal_handler(sig, frame):
-    print("You pressed Ctrl+C!")
-    server.shutdown()
 
+# Used by docker-compose down
+def sigterm_handler(signal, frame):
+    global teardown
 
+    logger.info("💥 Reacting to SIGTERM")
+    teardown = True
 
 
 
@@ -48,12 +54,25 @@ def signal_handler(sig, frame):
 
 # server.server_close()
 
+
+
+logging.basicConfig(
+    format="[%(asctime)s] %(levelname)-8s %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+signal.signal(signal.SIGTERM, sigterm_handler)
+
 myserver = MyServer(host="::", port=50000)
 myserver.start()
 
+teardown = False
+
 while True:
-    try:
-        time.sleep(1)
-    except KeyboardInterrupt:
+    if teardown:
         myserver.teardown()
         break
+
+    time.sleep(1)
