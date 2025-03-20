@@ -1,0 +1,29 @@
+services:
+  ecg:
+    build: .
+    user: ${UID:-1000}:${GID:-1000}
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DEBUG=1
+      # - QT_DEBUG_PLUGINS=1
+      - DISPLAY=${DISPLAY}
+      - HOME=/tmp
+      # Prevent a warning when launching the app
+      - XDG_RUNTIME_DIR=/tmp/runtime-
+    ports:
+      - 50000:50000
+    volumes:
+      - .:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    tmpfs:
+      - /tmp
+    working_dir: /app
+    networks:
+      - default
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
+    command: ["python", "main.py"]
+
+networks:
+  default:
+    enable_ipv6: true
