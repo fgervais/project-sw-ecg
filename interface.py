@@ -40,9 +40,10 @@ class Dashboard(QMainWindow):
 
         self.setWindowTitle("ECG")
 
-        # https://www.flaticon.com/packs/school-kawaii-15764145
-        # icon = QIcon("flask-analysis.png")
-        # self.setWindowIcon(icon)
+        # https://www.flaticon.com/authors/june-design
+        # https://www.flaticon.com/packs/heart-emoticons-11
+        icon = QIcon("heart.png")
+        self.setWindowIcon(icon)
 
         layout = pg.LayoutWidget()
 
