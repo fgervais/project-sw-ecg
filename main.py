@@ -3,15 +3,14 @@ import logging
 import signal
 import time
 
+import interface
+
 from server import MyServer
 
 
 # Used by docker-compose down
 def sigterm_handler(signal, frame):
-    global teardown
-
     logger.info("💥 Reacting to SIGTERM")
-    teardown = True
 
 
 logging.basicConfig(
@@ -23,14 +22,10 @@ logger = logging.getLogger(__name__)
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
+dashboard = interface.Dashboard()
+
 myserver = MyServer(host="::", port=50000)
 myserver.start()
 
-teardown = False
-
-while True:
-    if teardown:
-        myserver.teardown()
-        break
-
-    time.sleep(1)
+interface.exec()
+myserver.teardown()
