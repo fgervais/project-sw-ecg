@@ -24,7 +24,7 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 
 dashboard = interface.Dashboard()
 
-myserver = MyServer(host="::", port=50000)
+myserver = MyServer(dashboard, host="::", port=50000)
 myserver.start()
 
 interface.exec()

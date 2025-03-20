@@ -15,7 +15,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         
         try:
             while True:
-                received_bytes = self.request.recv(2000)
+                received_bytes = self.request.recv(1000)
 
                 if not received_bytes:
                     print(f"Connection from {self.client_address} closed.")
@@ -23,6 +23,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
                 integer_value = struct.unpack('!I', received_bytes)[0]
                 print(integer_value)
+                self.server.dashboard.update_battery_voltage_view(integer_value/1000)
 
         except ConnectionResetError:
             print(f"Connection reset by {self.client_address}")
@@ -32,20 +33,21 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             self.request.close()  # Ensure socket is closed
 
 
-class MyServer(Thread):
-    def __init__(self, host="::", port=50000):
-        super().__init__()
+class MyServer(TCPServer6, Thread):
+    def __init__(self, dashboard, host="::", port=50000):
+        TCPServer6.__init__(self, (host, port), MyTCPHandler)
+        Thread.__init__(self)
 
-        self.server = TCPServer6((host, port), MyTCPHandler)
+        self.dashboard = dashboard
 
         # self.asked_to_teardown = False
 
     def teardown(self):
         print("teardown")
-        self.server.shutdown()
-        self.server.server_close()
+        self.shutdown()
+        self.server_close()
 
         # self.asked_to_teardown = True
 
     def run(self):
-        self.server.serve_forever()
+        self.serve_forever()
