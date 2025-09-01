@@ -49,8 +49,10 @@ class Dashboard(QMainWindow):
 
         self.setCentralWidget(layout)
 
-        widget, self.voltage_connector = self.build_battery_voltage_ui()
+        widget, self.ecg_connector = self.build_ecg_ui()
         layout.addWidget(widget, row=0, col=0)
+        widget, self.voltage_connector = self.build_battery_voltage_ui()
+        layout.addWidget(widget, row=1, col=0)
 
         self.show()
 
@@ -59,6 +61,22 @@ class Dashboard(QMainWindow):
 
     def build_battery_voltage_ui(self):
         plot_widget = LivePlotWidget(title=f"Battery voltage")
+        plot_curve = LiveLinePlot()
+        plot_curve.set_leading_line(
+            LeadingLine.VERTICAL, pen=mkPen("red"), text_axis=LeadingLine.AXIS_Y
+        )
+        plot_widget.addItem(plot_curve)
+        data_connector = DataConnector(
+            plot_curve, max_points=60 * 60, update_rate=100
+        )
+
+        return plot_widget, data_connector
+
+    def update_ecg_view(self, ecg):
+        self.ecg_connector.cb_append_data_point(ecg)
+
+    def build_ecg_ui(self):
+        plot_widget = LivePlotWidget(title=f"ECG")
         plot_curve = LiveLinePlot()
         plot_curve.set_leading_line(
             LeadingLine.VERTICAL, pen=mkPen("red"), text_axis=LeadingLine.AXIS_Y

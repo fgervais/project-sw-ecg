@@ -11,19 +11,31 @@ class TCPServer6(socketserver.TCPServer):
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
+        buffer = bytearray()
+
         print(f"Received from {self.client_address[0]}:")
         
         try:
             while True:
-                received_bytes = self.request.recv(1000)
+                chunk = self.request.recv(1000)
 
-                if not received_bytes:
+                if not chunk:
                     print(f"Connection from {self.client_address} closed.")
                     break
 
-                integer_value = struct.unpack('!I', received_bytes)[0]
-                print(integer_value)
-                self.server.dashboard.update_battery_voltage_view(integer_value/1000)
+                buffer.extend(chunk)
+
+                while len(buffer) >= 4:
+                    int_byte = buffer[:4]
+                    buffer = buffer[4:]
+
+                    value = struct.unpack("!i", int_byte)[0]
+                    scaled = value / (2**31)
+
+                    # integer_value = struct.unpack('!I', received_bytes)[0] // for voltage
+                    print(scaled)
+                    # self.server.dashboard.update_battery_voltage_view(integer_value/1000)
+                    self.server.dashboard.update_ecg_view(scaled)
 
         except ConnectionResetError:
             print(f"Connection reset by {self.client_address}")
