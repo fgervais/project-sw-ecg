@@ -83,7 +83,7 @@ class Dashboard(QMainWindow):
         )
         plot_widget.addItem(plot_curve)
         data_connector = DataConnector(
-            plot_curve, max_points=60 * 60, update_rate=100
+            plot_curve, max_points=128 * 2, update_rate=100
         )
 
         return plot_widget, data_connector
