@@ -5,7 +5,7 @@ import time
 
 import interface
 
-from server import MyServer
+from server_coap import CoAPServer
 
 
 # Used by docker-compose down
@@ -24,8 +24,10 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 
 dashboard = interface.Dashboard()
 
-myserver = MyServer(dashboard, host="::", port=50000)
-myserver.start()
+server = CoAPServer()
+server.start()
 
 interface.exec()
-myserver.teardown()
+
+server.stop()
+server.join()

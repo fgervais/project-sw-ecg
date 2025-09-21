@@ -17,6 +17,7 @@ RUN apt-get update && \
 		libxkbcommon-x11-0
 
 RUN pip install \
+	aiocoap[oscore,prettyprint] \
 	opencv-python-headless \
 	paho-mqtt \
 	pglive \
