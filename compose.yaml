@@ -11,7 +11,7 @@ services:
       # Prevent a warning when launching the app
       - XDG_RUNTIME_DIR=/tmp/runtime-
     ports:
-      - 5683:5683
+      - 5683:5683/udp
     volumes:
       - .:/app
       - /tmp/.X11-unix:/tmp/.X11-unix
