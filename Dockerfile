@@ -28,5 +28,6 @@ RUN pip install \
 	# for adding a dark theme but the white bars of the default theme were
 	# getting stuck in my monitor for some reason so I take the risk.
 	git+https://github.com/woopelderly/PyQtDarkTheme.git@python3.12 \
+	numpy \
 	pyqtgraph \
 	scipy

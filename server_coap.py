@@ -1,4 +1,6 @@
 import asyncio
+import numpy as np
+import struct
 
 from threading import Thread
 from aiocoap import resource, Message, Context, Code
@@ -30,8 +32,13 @@ class ECGResource(resource.Resource):
         self.device_logic = device_logic
 
     async def render_post(self, request: Message):
-        response_text = self.device_logic.process_ecg(request.payload)
-        return Message(code=Code.CONTENT, payload=response_text.encode())
+        count = len(request.payload) // 4
+        values = struct.unpack(f"!{count}i", request.payload)
+        arr = np.array(values, dtype=np.int32)
+        scaled = arr / (2**31)
+        print(f"scaled = {scaled}")
+        # response_text = self.device_logic.process_ecg(request.payload)
+        return Message(code=Code.CONTENT, payload="")
 
 
 class BatteryResource(resource.Resource):
