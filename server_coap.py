@@ -38,7 +38,7 @@ class ECGResource(resource.Resource):
         scaled = arr / (2**31)
         print(f"scaled = {scaled}")
         # response_text = self.device_logic.process_ecg(request.payload)
-        return Message(code=Code.CONTENT, payload="")
+        return Message(code=Code.CHANGED)
 
 
 class BatteryResource(resource.Resource):
