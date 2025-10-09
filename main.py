@@ -24,7 +24,7 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 
 dashboard = interface.Dashboard()
 
-server = CoAPServer()
+server = CoAPServer(dashboard)
 server.start()
 
 interface.exec()

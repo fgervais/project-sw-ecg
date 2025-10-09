@@ -5,6 +5,8 @@ import struct
 from threading import Thread
 from aiocoap import resource, Message, Context, Code
 
+from interface import Dashboard
+
 
 class DeviceLogic:
     def __init__(self):
@@ -27,9 +29,9 @@ class DeviceLogic:
 
 
 class ECGResource(resource.Resource):
-    def __init__(self, device_logic: DeviceLogic):
+    def __init__(self, dashboard: Dashboard):
         super().__init__()
-        self.device_logic = device_logic
+        self.dashboard = dashboard
 
     async def render_post(self, request: Message):
         count = len(request.payload) // 4
@@ -37,6 +39,10 @@ class ECGResource(resource.Resource):
         arr = np.array(values, dtype=np.int32)
         scaled = arr / (2**31)
         print(f"scaled = {scaled}")
+
+        for val in scaled:
+            self.dashboard.update_ecg_view(val)
+
         # response_text = self.device_logic.process_ecg(request.payload)
         return Message(code=Code.CHANGED)
 
@@ -52,12 +58,12 @@ class BatteryResource(resource.Resource):
 
 
 class CoAPServer(Thread):
-    def __init__(self):
+    def __init__(self, dashboard: Dashboard):
         super().__init__()
         self.loop = None
         self.context = None
         self.forever_future = None
-        self.device_logic = DeviceLogic()
+        self.dashboard = dashboard
 
     def run(self):
         self.loop = asyncio.new_event_loop()
@@ -67,8 +73,8 @@ class CoAPServer(Thread):
     async def _async_run(self):
         # Build site with resources
         root = resource.Site()
-        root.add_resource(['ecg'], ECGResource(self.device_logic))
-        root.add_resource(['battery'], BatteryResource(self.device_logic))
+        root.add_resource(['ecg'], ECGResource(self.dashboard))
+        root.add_resource(['battery'], BatteryResource(self.dashboard))
 
         # Start CoAP context
         self.context = await Context.create_server_context(root, bind=("::", 5683))
